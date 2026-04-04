@@ -1,0 +1,23 @@
+@book{griffithsIntroductionElectrodynamics2017,
+  title = {Introduction to Electrodynamics},
+  author = {Griffiths, David Jeffrey},
+  date = {2017},
+  edition = {4 ed},
+  publisher = {Cambridge university press},
+  location = {Cambridge},
+  isbn = {978-1-108-42041-9},
+  langid = {english},
+  keywords = {en cours}
+}
+
+@book{scherzPracticalElectronicsInventors2016,
+  title = {Practical Electronics for Inventors},
+  author = {Scherz, Paul and Monk, Simon},
+  date = {2016},
+  edition = {Fourth Edition},
+  publisher = {McGraw-Hill Education},
+  location = {New York},
+  isbn = {978-1-259-58754-2},
+  pagetotal = {1027},
+  keywords = {Electronics,Textbooks}
+}

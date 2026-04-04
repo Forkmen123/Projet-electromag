@@ -1,0 +1,74 @@
+\documentclass[11pt, letterpaper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{geometry}
+\usepackage{enumitem}
+\usepackage{cancel}
+\usepackage{physics}
+\usepackage{siunitx}
+\usepackage{float}
+\usepackage{gensymb}
+\usepackage{graphicx}
+\usepackage{tcolorbox}
+\geometry{margin=1in}
+\usepackage[backend=biber, style=apa]{biblatex}
+\addbibresource{ressources/bibliographie.biblatex}
+\tcbset{
+    tommy/.style={
+        colback=gray!10,
+        colframe=black,
+        boxsep=1mm,    
+        arc=1mm        
+    }
+}
+
+\begin{document}
+
+\begin{titlepage}
+    \centering
+    \includegraphics[width=4cm]{Logo_Ulaval.jpg}\\
+    {\large Département de physique, de génie physique et d'optique\\[4cm]}
+    {\LARGE\bfseries Capteur MEMS capacitif \\[3cm]}
+    {\large Travail remis à\\[0.3cm]
+    Simon Rainville \\[2cm]}
+    {\large Par\\[0.3cm]
+    Tommy Roy\\
+    Guillaume Perron\\
+    Anakin Schroeder Tabah\\[3cm]}
+    {\large Cours: PHY-1005\\[0.2cm]
+    Date de remise: 10 avril 2026}
+    \vfill
+\end{titlepage}
+\cite{scherzPracticalElectronicsInventors2016}
+
+Ce sont les paramètres géométriques d'un condensateur qui varie afin de faire un accéléromtre.
+
+
+\section*{Question 1 : Capacité en fonction de l'accélération}
+On veut trovuer la sensibilité $ \frac{dC}{da} $ et on doit faire une application numérique avec des valeurs réalistes. 
+\\
+Condensateur chargé à $V_0 = 3 $ V puis déconnecté de la source, $\Delta V = ?$.
+
+
+\section*{Question 2 : Conception pour conditions extrêmes}
+Le capteur doit mesurer des accélérations avec une incertitude de $\pm 50$g.  
+\\
+Est0ce que notre capteur fonctionne encore ?
+\\
+Si non, on propose un design modifié et on calcule ses performances. 
+
+
+
+\section*{Utilisation de l'intelligence artificielle}
+Voici les outils d'intelligence artificielle et pour quel aspects précisément... 
+
+
+
+
+
+\printbibliography
+
+\end{document}

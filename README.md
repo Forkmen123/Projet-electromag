@@ -1,1 +1,3 @@
-# Projet-electromag
+Guillaume Perron
+Anakin Schroeder Tabah
+Tommy Roy 
