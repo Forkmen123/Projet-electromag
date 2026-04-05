@@ -21,3 +21,14 @@
   pagetotal = {1027},
   keywords = {Electronics,Textbooks}
 }
+
+@book{senturiaMicrosystemDesign2001,
+  title = {Microsystem Design},
+  author = {Senturia, Stephen D.},
+  date = {2001},
+  publisher = {Kluwer Academic Publishers},
+  location = {Boston},
+  isbn = {978-0-7923-7246-2},
+  pagetotal = {689},
+  keywords = {Design and construction,Microelectromechanical systems,Microelectronics,System design}
+}

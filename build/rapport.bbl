@@ -19,35 +19,29 @@
 
 \refsection{0}
   \datalist[entry]{apa/apasortcite//global/global/global}
-    \entry{scherzPracticalElectronicsInventors2016}{book}{}{}
-      \name{author}{2}{}{%
-        {{un=0,uniquepart=base,hash=b36f525fbc702525c98c0394334fd47d}{%
-           family={Scherz},
+    \entry{senturiaMicrosystemDesign2001}{book}{}{}
+      \name{author}{1}{}{%
+        {{un=0,uniquepart=base,hash=6757b4c2ba6385a71138ad324649c6ff}{%
+           family={Senturia},
            familyi={S\bibinitperiod},
-           given={Paul},
-           giveni={P\bibinitperiod},
-           givenun=0}}%
-        {{un=0,uniquepart=base,hash=0550c7914a6693d2e452b9ff5c26f725}{%
-           family={Monk},
-           familyi={M\bibinitperiod},
-           given={Simon},
-           giveni={S\bibinitperiod},
+           given={Stephen\bibnamedelima D.},
+           giveni={S\bibinitperiod\bibinitdelim D\bibinitperiod},
            givenun=0}}%
       }
       \list{location}{1}{%
-        {New York}%
+        {Boston}%
       }
       \list{publisher}{1}{%
-        {McGraw-Hill Education}%
+        {Kluwer Academic Publishers}%
       }
-      \strng{namehash}{a6e876a71a10d87af3f92f316d992a1e}
-      \strng{fullhash}{a6e876a71a10d87af3f92f316d992a1e}
-      \strng{fullhashraw}{a6e876a71a10d87af3f92f316d992a1e}
-      \strng{bibnamehash}{a6e876a71a10d87af3f92f316d992a1e}
-      \strng{authorbibnamehash}{a6e876a71a10d87af3f92f316d992a1e}
-      \strng{authornamehash}{a6e876a71a10d87af3f92f316d992a1e}
-      \strng{authorfullhash}{a6e876a71a10d87af3f92f316d992a1e}
-      \strng{authorfullhashraw}{a6e876a71a10d87af3f92f316d992a1e}
+      \strng{namehash}{6757b4c2ba6385a71138ad324649c6ff}
+      \strng{fullhash}{6757b4c2ba6385a71138ad324649c6ff}
+      \strng{fullhashraw}{6757b4c2ba6385a71138ad324649c6ff}
+      \strng{bibnamehash}{6757b4c2ba6385a71138ad324649c6ff}
+      \strng{authorbibnamehash}{6757b4c2ba6385a71138ad324649c6ff}
+      \strng{authornamehash}{6757b4c2ba6385a71138ad324649c6ff}
+      \strng{authorfullhash}{6757b4c2ba6385a71138ad324649c6ff}
+      \strng{authorfullhashraw}{6757b4c2ba6385a71138ad324649c6ff}
       \field{sortinit}{S}
       \field{sortinithash}{b164b07b29984b41daf1e85279fbc5ab}
       \field{extradatescope}{labelyear}
@@ -55,45 +49,38 @@
       \true{uniqueprimaryauthor}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
-      \field{edition}{Fourth Edition}
-      \field{isbn}{978-1-259-58754-2}
-      \field{pagetotal}{1027}
-      \field{title}{Practical Electronics for Inventors}
-      \field{year}{2016}
+      \field{isbn}{978-0-7923-7246-2}
+      \field{pagetotal}{689}
+      \field{title}{Microsystem Design}
+      \field{year}{2001}
       \field{dateera}{ce}
-      \keyw{Electronics,Textbooks}
+      \keyw{Design and construction,Microelectromechanical systems,Microelectronics,System design}
     \endentry
   \enddatalist
   \datalist[entry]{apa/global//global/global/global}
-    \entry{scherzPracticalElectronicsInventors2016}{book}{}{}
-      \name{author}{2}{}{%
-        {{un=0,uniquepart=base,hash=b36f525fbc702525c98c0394334fd47d}{%
-           family={Scherz},
+    \entry{senturiaMicrosystemDesign2001}{book}{}{}
+      \name{author}{1}{}{%
+        {{un=0,uniquepart=base,hash=6757b4c2ba6385a71138ad324649c6ff}{%
+           family={Senturia},
            familyi={S\bibinitperiod},
-           given={Paul},
-           giveni={P\bibinitperiod},
-           givenun=0}}%
-        {{un=0,uniquepart=base,hash=0550c7914a6693d2e452b9ff5c26f725}{%
-           family={Monk},
-           familyi={M\bibinitperiod},
-           given={Simon},
-           giveni={S\bibinitperiod},
+           given={Stephen\bibnamedelima D.},
+           giveni={S\bibinitperiod\bibinitdelim D\bibinitperiod},
            givenun=0}}%
       }
       \list{location}{1}{%
-        {New York}%
+        {Boston}%
       }
       \list{publisher}{1}{%
-        {McGraw-Hill Education}%
+        {Kluwer Academic Publishers}%
       }
-      \strng{namehash}{a6e876a71a10d87af3f92f316d992a1e}
-      \strng{fullhash}{a6e876a71a10d87af3f92f316d992a1e}
-      \strng{fullhashraw}{a6e876a71a10d87af3f92f316d992a1e}
-      \strng{bibnamehash}{a6e876a71a10d87af3f92f316d992a1e}
-      \strng{authorbibnamehash}{a6e876a71a10d87af3f92f316d992a1e}
-      \strng{authornamehash}{a6e876a71a10d87af3f92f316d992a1e}
-      \strng{authorfullhash}{a6e876a71a10d87af3f92f316d992a1e}
-      \strng{authorfullhashraw}{a6e876a71a10d87af3f92f316d992a1e}
+      \strng{namehash}{6757b4c2ba6385a71138ad324649c6ff}
+      \strng{fullhash}{6757b4c2ba6385a71138ad324649c6ff}
+      \strng{fullhashraw}{6757b4c2ba6385a71138ad324649c6ff}
+      \strng{bibnamehash}{6757b4c2ba6385a71138ad324649c6ff}
+      \strng{authorbibnamehash}{6757b4c2ba6385a71138ad324649c6ff}
+      \strng{authornamehash}{6757b4c2ba6385a71138ad324649c6ff}
+      \strng{authorfullhash}{6757b4c2ba6385a71138ad324649c6ff}
+      \strng{authorfullhashraw}{6757b4c2ba6385a71138ad324649c6ff}
       \field{sortinit}{S}
       \field{sortinithash}{b164b07b29984b41daf1e85279fbc5ab}
       \field{extradatescope}{labelyear}
@@ -101,13 +88,12 @@
       \true{uniqueprimaryauthor}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
-      \field{edition}{Fourth Edition}
-      \field{isbn}{978-1-259-58754-2}
-      \field{pagetotal}{1027}
-      \field{title}{Practical Electronics for Inventors}
-      \field{year}{2016}
+      \field{isbn}{978-0-7923-7246-2}
+      \field{pagetotal}{689}
+      \field{title}{Microsystem Design}
+      \field{year}{2001}
       \field{dateera}{ce}
-      \keyw{Electronics,Textbooks}
+      \keyw{Design and construction,Microelectromechanical systems,Microelectronics,System design}
     \endentry
   \enddatalist
 \endrefsection

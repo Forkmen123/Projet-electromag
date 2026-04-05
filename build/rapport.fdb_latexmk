@@ -1,13 +1,13 @@
 # Fdb version 4
-["biber build/rapport"] 1775337592.94645 "build/rapport.bcf" "build/rapport.bbl" "build/rapport" 1775337603.27934 0
-  "build/rapport.bcf" 1775337603.22571 134055 6df66601dd4f9e62731c37c1e675657a "pdflatex"
-  "ressources/bibliographie.biblatex" 1775337285.74158 659 07a32ddda5dca76364541543e8ea28cc ""
+["biber build/rapport"] 1775343865.27224 "build/rapport.bcf" "build/rapport.bbl" "build/rapport" 1775343868.15872 0
+  "build/rapport.bcf" 1775343868.10595 134129 d8708fc6de01179098b83ea62b5c96c2 "pdflatex"
+  "ressources/bibliographie.biblatex" 1775342901.96276 1002 9ed42af207f956e5c021f84ccd903fa7 ""
   (generated)
   "build/rapport.bbl"
   "build/rapport.blg"
   (rewritten before read)
-["pdflatex"] 1775337602.54861 "/Users/tommy/02-programmation/projet-electromag/rapport.tex" "build/rapport.pdf" "rapport" 1775337603.27957 0
-  "/Users/tommy/02-programmation/projet-electromag/rapport.tex" 1775337602.36825 1984 9eae0c49efc0c58ee827e7c29d8296fa ""
+["pdflatex"] 1775343867.48164 "/Users/tommy/02-programmation/projet-electromag/rapport.tex" "build/rapport.pdf" "rapport" 1775343868.15894 0
+  "/Users/tommy/02-programmation/projet-electromag/rapport.tex" 1775343864.26604 2614 434ce221daee99a0f6e695adf96232f3 ""
   "/usr/local/texlive/2026/texmf-dist/fonts/enc/dvips/cm-super/cm-super-t1.enc" 1136849721 2971 def0b6c1f0b107b3b936def894055589 ""
   "/usr/local/texlive/2026/texmf-dist/fonts/map/fontname/texfonts.map" 1577235249 3524 cb3e574dea2d1052e39280babc910dc8 ""
   "/usr/local/texlive/2026/texmf-dist/fonts/tfm/jknappen/ec/ecbx1440.tfm" 1136768653 3584 13049b61b922a28b158a38aeff75ee9b ""
@@ -186,10 +186,10 @@
   "/usr/local/texlive/2026/texmf-var/web2c/pdftex/pdflatex.fmt" 1772409757 3636768 9f94d239f422c02416e379a36a852ffd ""
   "/usr/local/texlive/2026/texmf.cnf" 1772409725 577 648cd9f92f9c0eac486f4c71c85cfbbe ""
   "Logo_Ulaval.jpg" 1775328935.7698 95923 2bcfb33efa1b8afec12d574ff3b12b34 ""
-  "build/rapport.aux" 1775337603.22427 668 db4fe1d607c1c4bd4082e52ac467f5c3 "pdflatex"
-  "build/rapport.bbl" 1775337594.89439 4020 1537a54496a54734edbc8bc3d453ed3c "biber build/rapport"
-  "build/rapport.run.xml" 1775337603.22613 2397 ae56149f520815c1c0e9c1a2ec4ae800 "pdflatex"
-  "rapport.tex" 1775337602.36825 1984 9eae0c49efc0c58ee827e7c29d8296fa ""
+  "build/rapport.aux" 1775343868.10448 816 8f3ea7c309091626685916dec19e9bc9 "pdflatex"
+  "build/rapport.bbl" 1775343866.78517 3678 72dde558d353928133258f58ad20a737 "biber build/rapport"
+  "build/rapport.run.xml" 1775343868.10693 2397 ae56149f520815c1c0e9c1a2ec4ae800 "pdflatex"
+  "rapport.tex" 1775343864.26604 2614 434ce221daee99a0f6e695adf96232f3 ""
   (generated)
   "build/rapport.aux"
   "build/rapport.bcf"
