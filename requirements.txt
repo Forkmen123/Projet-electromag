@@ -1,6 +1,4 @@
 numpy
 scipy
 matplotlib
-pyopencl
-mako
-siphash24
+jupyter

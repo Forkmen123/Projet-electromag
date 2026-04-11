@@ -18,15 +18,14 @@
 
 
 \refsection{0}
-  \datalist[entry]{apa/apasortcite//global/global/global}
+  \datalist[entry]{nty/global//global/global/global}
     \entry{senturiaMicrosystemDesign2001}{book}{}{}
       \name{author}{1}{}{%
-        {{un=0,uniquepart=base,hash=6757b4c2ba6385a71138ad324649c6ff}{%
+        {{hash=6757b4c2ba6385a71138ad324649c6ff}{%
            family={Senturia},
            familyi={S\bibinitperiod},
            given={Stephen\bibnamedelima D.},
-           giveni={S\bibinitperiod\bibinitdelim D\bibinitperiod},
-           givenun=0}}%
+           giveni={S\bibinitperiod\bibinitdelim D\bibinitperiod}}}%
       }
       \list{location}{1}{%
         {Boston}%
@@ -44,48 +43,6 @@
       \strng{authorfullhashraw}{6757b4c2ba6385a71138ad324649c6ff}
       \field{sortinit}{S}
       \field{sortinithash}{b164b07b29984b41daf1e85279fbc5ab}
-      \field{extradatescope}{labelyear}
-      \field{labeldatesource}{}
-      \true{uniqueprimaryauthor}
-      \field{labelnamesource}{author}
-      \field{labeltitlesource}{title}
-      \field{isbn}{978-0-7923-7246-2}
-      \field{pagetotal}{689}
-      \field{title}{Microsystem Design}
-      \field{year}{2001}
-      \field{dateera}{ce}
-      \keyw{Design and construction,Microelectromechanical systems,Microelectronics,System design}
-    \endentry
-  \enddatalist
-  \datalist[entry]{apa/global//global/global/global}
-    \entry{senturiaMicrosystemDesign2001}{book}{}{}
-      \name{author}{1}{}{%
-        {{un=0,uniquepart=base,hash=6757b4c2ba6385a71138ad324649c6ff}{%
-           family={Senturia},
-           familyi={S\bibinitperiod},
-           given={Stephen\bibnamedelima D.},
-           giveni={S\bibinitperiod\bibinitdelim D\bibinitperiod},
-           givenun=0}}%
-      }
-      \list{location}{1}{%
-        {Boston}%
-      }
-      \list{publisher}{1}{%
-        {Kluwer Academic Publishers}%
-      }
-      \strng{namehash}{6757b4c2ba6385a71138ad324649c6ff}
-      \strng{fullhash}{6757b4c2ba6385a71138ad324649c6ff}
-      \strng{fullhashraw}{6757b4c2ba6385a71138ad324649c6ff}
-      \strng{bibnamehash}{6757b4c2ba6385a71138ad324649c6ff}
-      \strng{authorbibnamehash}{6757b4c2ba6385a71138ad324649c6ff}
-      \strng{authornamehash}{6757b4c2ba6385a71138ad324649c6ff}
-      \strng{authorfullhash}{6757b4c2ba6385a71138ad324649c6ff}
-      \strng{authorfullhashraw}{6757b4c2ba6385a71138ad324649c6ff}
-      \field{sortinit}{S}
-      \field{sortinithash}{b164b07b29984b41daf1e85279fbc5ab}
-      \field{extradatescope}{labelyear}
-      \field{labeldatesource}{}
-      \true{uniqueprimaryauthor}
       \field{labelnamesource}{author}
       \field{labeltitlesource}{title}
       \field{isbn}{978-0-7923-7246-2}

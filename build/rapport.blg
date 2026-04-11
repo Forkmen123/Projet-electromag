@@ -1,19 +1,15 @@
 [0] Config.pm:328> INFO - This is Biber 2.21
 [0] Config.pm:331> INFO - Logfile is 'build/rapport.blg'
-[23] biber-darwin:342> INFO - === Sat Apr  4, 2026, 19:04:26
-[29] Biber.pm:421> INFO - Reading 'build/rapport.bcf'
-[58] Biber.pm:1002> INFO - Found 1 citekeys in bib section 0
-[64] Biber.pm:4487> INFO - Processing section 0
-[68] Biber.pm:4678> INFO - Looking for bibtex file 'ressources/bibliographie.biblatex' for section 0
-[68] bibtex.pm:1713> INFO - LaTeX decoding ...
-[70] bibtex.pm:1519> INFO - Found BibTeX data source 'ressources/bibliographie.biblatex'
-[88] UCollate.pm:68> INFO - Overriding locale 'fr-FR' defaults 'normalization = NFD' with 'normalization = prenormalized'
-[88] UCollate.pm:68> INFO - Overriding locale 'fr-FR' defaults 'variable = shifted' with 'variable = non-ignorable'
-[88] Biber.pm:4307> INFO - Sorting list 'apa/apasortcite//global/global/global' of type 'entry' with template 'apa' and locale 'fr-FR'
-[88] Biber.pm:4313> INFO - No sort tailoring available for locale 'fr-FR'
-[91] UCollate.pm:68> INFO - Overriding locale 'fr-FR' defaults 'normalization = NFD' with 'normalization = prenormalized'
-[91] UCollate.pm:68> INFO - Overriding locale 'fr-FR' defaults 'variable = shifted' with 'variable = non-ignorable'
-[91] Biber.pm:4307> INFO - Sorting list 'apa/global//global/global/global' of type 'entry' with template 'apa' and locale 'fr-FR'
-[91] Biber.pm:4313> INFO - No sort tailoring available for locale 'fr-FR'
-[91] bbl.pm:676> INFO - Writing 'build/rapport.bbl' with encoding 'UTF-8'
-[92] bbl.pm:779> INFO - Output to build/rapport.bbl
+[23] biber-darwin:342> INFO - === Fri Apr 10, 2026, 18:27:41
+[28] Biber.pm:421> INFO - Reading 'build/rapport.bcf'
+[52] Biber.pm:1002> INFO - Found 1 citekeys in bib section 0
+[56] Biber.pm:4487> INFO - Processing section 0
+[59] Biber.pm:4678> INFO - Looking for bibtex file 'ressources/bibliographie.biblatex' for section 0
+[60] bibtex.pm:1713> INFO - LaTeX decoding ...
+[61] bibtex.pm:1519> INFO - Found BibTeX data source 'ressources/bibliographie.biblatex'
+[78] UCollate.pm:68> INFO - Overriding locale 'fr-FR' defaults 'variable = shifted' with 'variable = non-ignorable'
+[78] UCollate.pm:68> INFO - Overriding locale 'fr-FR' defaults 'normalization = NFD' with 'normalization = prenormalized'
+[78] Biber.pm:4307> INFO - Sorting list 'nty/global//global/global/global' of type 'entry' with template 'nty' and locale 'fr-FR'
+[78] Biber.pm:4313> INFO - No sort tailoring available for locale 'fr-FR'
+[79] bbl.pm:676> INFO - Writing 'build/rapport.bbl' with encoding 'UTF-8'
+[79] bbl.pm:779> INFO - Output to build/rapport.bbl
