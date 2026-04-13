@@ -14,8 +14,8 @@
 \usepackage{graphicx}
 \usepackage{tcolorbox}
 \geometry{margin=1in}
-\usepackage[backend=biber]{biblatex}
-\addbibresource{ressources/bibliographie.biblatex}
+\usepackage{biblatex}
+\addbibresource{ressources/bibliographie.bib}
 \tcbset{
     tommy/.style={
         colback=gray!10,
@@ -48,15 +48,71 @@ Dans le \cite{senturiaMicrosystemDesign2001} il y a un exemple avec le ADXL150 q
 \\\\
 Le ADXL345 est \textit{digital} ce qui veut dire qu'il y a un ADC (analogue to digital converter) qui s'occupe de traduire les variations de $\Delta V$ en binaire. 
 \\\\
-Ensuite, l'information en binaire peut être envoyée à un 
+Ensuite, l'information en binaire peut être envoyée à un
 \\\\
 Ce sont les paramètres géométriques d'un condensateur qui varie afin de faire un accéléromtre. 
 
 
 \section*{Question 1 : Capacité en fonction de l'accélération}
-On veut trovuer la sensibilité $ \frac{dC}{da} $ et on doit faire une application numérique avec des valeurs réalistes. 
+
+
+On veut trouver la sensibilité $ \frac{dC}{da} $ et on doit faire une application numérique avec des valeurs réalistes. 
 \\
 Condensateur chargé à $V_0 = 3 $ V puis déconnecté de la source, $\Delta V = ?$.
+\\
+La définition de la capacitance va comme suit 
+\begin{align*}
+C \equiv \frac{Q}{V} \\
+\end{align*}
+Si on suppose que la charge sur chacune des plaques est de $Q$ et $-Q$, alors avec le théorème de Gauss, il est possible de déterminer le champ entre deux plaques minces d'aire A. 
+
+Pour la plaque (1) de la figure \ref{schema}
+\begin{align*}
+    \int_\mathcal{S}  \vec{E} \cdot d\vec{S}     &=  \frac{Q}{\epsilon_0}   \\
+\end{align*}
+
+Avec, $\vec{E} = E_z\, \hat{e}_z $ et $d\vec{S} = dx dy \, \hat{e}_z$
+
+\begin{align*}
+    \int_\mathcal{S}  E_z\, \cancel{\hat{e}_z} \cdot dx dy \, \cancel{\hat{e}_z} &=  \frac{Q}{\epsilon _0 } \\
+    \implies E_z \int_\mathcal{S}  dx dy  &=  \frac{Q}{\epsilon_0} \\
+    \implies E_z A &=  \frac{Q}{\epsilon_0} 
+\end{align*}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\linewidth]{images/schema.png}
+    \caption{Deux plaques parallèles}
+    \label{schema}
+\end{figure}
+Maintenant, trouvons la différence de potentiel entre les deux plaques. 
+
+\begin{align*}
+    \Delta  V &=  E z
+\end{align*}
+Alors, 
+\begin{align*}
+    \Delta V &=  \frac{Qz}{A\epsilon_0} \\
+    \implies C &= \frac{\cancel{Q}A \epsilon_0}{ \cancel{Q} z} \\
+    \implies C &=  \frac{A \epsilon_0}{ z} 
+\end{align*}
+
+
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.4\linewidth]{images/schema1.png}
+    \caption{schéma 1}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\linewidth]{images/schema2.png}
+    \caption{schéma 2}
+\end{figure}
+
+
+
 
 
 \section*{Question 2 : Conception pour conditions extrêmes}
