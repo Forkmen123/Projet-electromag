@@ -1,6 +1,6 @@
-import matplotlib.pyplot as plt 
 import numpy as np
-import sympy as sp
+import matplotlib.pyplot as plt
+from scipy.ndimage import convolve, generate_binary_structure
 
 # Constantes
 N = 8
@@ -10,50 +10,64 @@ l = 50e-6
 m = 3e-6
 k = 2
 epsilon_0 = 8.854e-12
-a = sp.symbols('a')
+resolution = 0.25  # résolution [µm/pixel]
+iters = 2000
 
 
-Nx, Ny = 100, 100
-V = np.zeros((Nx, Ny))
+grid = np.zeros((N,N,N))+0.5 # pourquoi faire + 0.5 ?
+
+
+grid[30:70,30:70,20] = 1
+grid[30:70,30:70,80] = 0
+mask_pos = grid==1
+mask_neg = grid==0
 
 
 
-V[0:3, 10:120] = 1.0
-V[0:3, 20:130] = -1.0
+yv, xv, zv = np.meshgrid(np.arange(N),np.arange(N),np.arange(N))
+#grid = 1-zv/100
 
-for iteration in range(10000):
-    V_old = V.copy()
-    V[1:-1, 1:-1] = 0.25 * (V[2:, 1:-1] + V[:-2, 1:-1] + 
-                             V[1:-1, 2:] + V[1:-1, :-2])
-    
-    # re-enforce boundary conditions after each update
-    V[0:3, 10:120] = 1.0
-    V[0:3, 20:130] = -1.0
-    
-    # check convergence
-    if np.max(np.abs(V - V_old)) < 1e-5:
-        print(f"Converged at iteration {iteration}")
-        break
 
-plt.imshow(V, cmap='hot')
-plt.colorbar(label='V')
-plt.title('Potential field')
+
+kern = generate_binary_structure(3,1).astype(float)/6
+kern[1,1,1] = 0
+
+
+
+
+def neumann(a):
+    a[0,:,:] = a[1,:,:]; a[-1,:,:] = a[-2,:,:]
+    a[:,0,:] = a[:,1,:]; a[:,-1,:] = a[:,-2,:]
+    a[:,:,0] = a[:,:,1]; a[:,:,-1] = a[:,:,-2]
+    return a
+
+for i in range(iters):
+    grid_updated = convolve(grid,kern, mode='constant')
+    # Boundary conditions (neumann)
+    grid_updated = neumann(grid_updated)
+    # Boundary conditions (dirchlett)
+    grid_updated[mask_pos] = 1
+    grid_updated[mask_neg] = 0
+    grid = grid_updated
+
+slc = 40
+
+
+
+x = np.linspace(0, 1, grid.shape[1])
+y = np.linspace(0, 1, grid.shape[0])
+
+slc = 40
+
+plt.figure(figsize=(6,5))
+
+CS = plt.contourf(x, y, grid[slc], levels=100, cmap='viridis')
+plt.colorbar(CS)
+
+plt.axvline(0.2, ymin=0.3, ymax=0.7, color='r')
+plt.axvline(0.8, ymin=0.3, ymax=0.7, color='g')
+
 plt.show()
-
-# ri = np.linspace(0,1,500)
-
-# liste = []
-# C_tot = 0
-# for i in range(int(N/2)): # on fait / 2 parce que c'est symétrique
-#     for j in range(i, N):
-#         liste.append((i, j))
-#         distance = abs(j-i) * (D / 2)
-#         delta_d = (m * a) / (k)
-#         C_tot += (l * h * epsilon_0) / (distance - delta_d)
-                    
-# print(sp.simplify(C_tot))
-
-
 
 
 
