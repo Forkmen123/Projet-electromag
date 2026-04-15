@@ -13,6 +13,8 @@
 \usepackage{gensymb}
 \usepackage{graphicx}
 \usepackage{tcolorbox}
+\usepackage{blindtext}
+\usepackage{multicol}
 \geometry{margin=1in}
 \usepackage{biblatex}
 \addbibresource{ressources/bibliographie.bib}
@@ -33,7 +35,7 @@
     {\large Département de physique, de génie physique et d'optique\\[4cm]}
     {\LARGE\bfseries Capteur MEMS capacitif \\[3cm]}
     {\large Travail remis à\\[0.3cm]
-    Simon Rainville \\[2cm]}
+    Xavier Roy-Pormeleau \\[2cm]}
     {\large Par\\[0.3cm]
     Tommy Roy\\
     Anakin Schroeder Tabah\\[3cm]}
@@ -44,33 +46,34 @@
 
 
 
+
 Dans le \cite{senturiaMicrosystemDesign2001} il y a un exemple avec le ADXL150 qui correspond à l'appareil qui converti le mouvement mécanique en différence de potentiel. ADXL150 ressemble à ADXL345, mais possède une plus grande plage dynamique, ce qui signifie que cet accéléromètre peut mesurer des accélérations supérieures aus ADXL345 (pourquoi ?). Voir à partir de la page 513 dans \cite{senturiaMicrosystemDesign2001}
 \\\\
 Le ADXL345 est \textit{digital} ce qui veut dire qu'il y a un ADC (analogue to digital converter) qui s'occupe de traduire les variations de $\Delta V$ en binaire. 
 \\\\
 Ensuite, l'information en binaire peut être envoyée à un
 \\\\
-Ce sont les paramètres géométriques d'un condensateur qui varie afin de faire un accéléromtre. 
+Ce sont les paramètres géométriques d'un condensateur qui varient afin de faire un accéléromètre. 
 
 
-\section*{Question 1 : Capacité en fonction de l'accélération}
+\section*{Capacité en fonction de l'accélération}
 
+\begin{multicols}{2}
+[
+All human things are subject to decay. And when fate summons, Monarchs must obey.
+]
+bonjour kjejhfwkjehfwkjehfw efwjk ehnflkwjeh wkljehf lwkjehf wedkjqwhdkjqhwdkjhqwd kjqhwdkjqh wkdjqh wkjdhq wkjdh qwkjdh qkwjd hqwkjdhqkwjdh qkjwhd qkjwhdkq jwhdkjq hwdkj qhwdkj qhwkd jhqwkjd hqwkjd hqwkjdhq w
 
-On veut trouver la sensibilité $ \frac{dC}{da} $ et on doit faire une application numérique avec des valeurs réalistes. 
-\\
-Condensateur chargé à $V_0 = 3 $ V puis déconnecté de la source, $\Delta V = ?$.
-\\
-La définition de la capacitance va comme suit 
+Afin de déterminer la capacité selon l'accélération, on doit trouver la sensibilité $ \frac{dC}{da} $. On commence donc par définir l'équation pour la capacitance. La définition de la capacitance va comme suit:
 \begin{align*}
-C \equiv \frac{Q}{V} \\
+C \equiv \frac{Q}{V}
 \end{align*}
-Si on suppose que la charge sur chacune des plaques est de $Q$ et $-Q$, alors avec le théorème de Gauss, il est possible de déterminer le champ entre deux plaques minces d'aire A. 
-
-Pour la plaque (1) de la figure \ref{schema}
+En supposant que l'aire (A) des deux plaques est beaucoup plus grande que la distance entre celles-ci et que la charge sur chacune des plaques est de $Q$ et $-Q$, il est possible de déterminer le champ entre les plaques en utilisant le théorème de Gauss. 
+\\\\
+Trouvons le champ entre les deux plaques (voir la figure \ref{schema})
 \begin{align*}
     \int_\mathcal{S}  \vec{E} \cdot d\vec{S}     &=  \frac{Q}{\epsilon_0}   \\
 \end{align*}
-
 Avec, $\vec{E} = E_z\, \hat{e}_z $ et $d\vec{S} = dx dy \, \hat{e}_z$
 
 \begin{align*}
@@ -81,44 +84,75 @@ Avec, $\vec{E} = E_z\, \hat{e}_z $ et $d\vec{S} = dx dy \, \hat{e}_z$
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.6\linewidth]{images/schema.png}
+    \includegraphics[width=0.8\linewidth]{images/schema.png}
     \caption{Deux plaques parallèles}
     \label{schema}
 \end{figure}
-Maintenant, trouvons la différence de potentiel entre les deux plaques. 
+
+Par la suite, on doit trouver la différence de potentiel entre les deux plaques.
 
 \begin{align*}
     \Delta  V &=  E z
 \end{align*}
-Alors, 
+
+En combinant les deux équations établies précédemment, on peut alors obtenir une équation de la capacitance selon la distance entre les plaques.
+
 \begin{align*}
     \Delta V &=  \frac{Qz}{A\epsilon_0} \\
     \implies C &= \frac{\cancel{Q}A \epsilon_0}{ \cancel{Q} z} \\
     \implies C &=  \frac{A \epsilon_0}{ z} 
 \end{align*}
+\\\\
+% On peut maintenant calculer la différence de capacitance afin d'obtenir une relation de la capacitance selon l'accélération.
+% \\\\
+% \begin{align*}
+%     \Delta C &=C_2-C_1\\
+% \end{align*}
 
+% Puisque il y a plusieurs doigts, on multiplie la capacitance par le nombre de doigt. De plus, puisque la distance entre les plaques/doigt change, on soustrait $\Delta d$ à l'un et on additionne se déplacement à l'autre.
 
+% \begin{align*}
+%     \Delta C &= \frac{A \epsilon_0}{d+\Delta d} \cdot N - \frac{A \epsilon_0}{d-\Delta d} \cdot N
+% \end{align*}
+
+% L'aire de chaque plaque est $A=l \cdot h$ tel que vue à la figure 2. Le déplacement $\Delta d$ est en fonction de l'accélération grâce à la formule $F=ma$ et $F= -k \Delta d$ car la force sur le ressort c'est l'accélération. Lorsque on combine les deux on obtient que $\Delta d = \frac{ma}{k}$.
+
+Supposons que les plaques sont minces et infinies. Pour une seule paire de condensateurs, on 
+
+% \begin{align*}
+     % \Delta C &= \frac{l h N \epsilon_0}{d- \frac{ma}{k}} - \frac{l h N \epsilon_0}{d+\frac{ma}{k}}\\
+%      &= \frac{l h N\epsilon_0 \cdot \left(d+\frac{ma}{k}\right) - l h N \epsilon_0 \cdot \left(d-\frac{ma}{k}\right)}{ \left(d-\frac{ma}{k}\right) \left(d+\frac{ma}{k}\right)}\\
+%      &= \frac{l h N \epsilon_0 \left(\cancel{d}+\frac{ma}{k}-\cancel{d}+\frac{ma}{k} \right)}{d^2+ \cancel{\frac{dma}{k}}-\cancel{\frac{dma}{k}}-\left( \frac{ma}{k}\right)^2}\\
+%      &= \frac{lh N \epsilon_0 \frac{2ma}{k}}{d^2-\left( \frac{ma}{k} \right)^2 }\\
+%      &= \frac{2lh N \epsilon_0 ma}{k\left(d^2-\left(\frac{ma}{k}\right)^2\right)}
+% \end{align*}
+
+% Pour de petit déplacement, on peut faire l'approximation que le déplacement beaucoup plus petit que la distance entre chaque plaque est néglieable.
+% \begin{align*}
+%      &= \frac{2lh N \epsilon_0 ma}{k\left(d^2-\left(\frac{ma}{k}\right)^2\right)}
+% \end{align*}
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.4\linewidth]{images/schema1.png}
+    \includegraphics[width=0.8\linewidth]{images/schema2.png}
     \caption{schéma 1}
 \end{figure}
 
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.5\linewidth]{images/schema2.png}
+    \includegraphics[width=0.8\linewidth]{images/schema1.png}
     \caption{schéma 2}
 \end{figure}
 
 
 
+\end{multicols}
 
 
-\section*{Question 2 : Conception pour conditions extrêmes}
+\section*{Conception pour conditions extrêmes}
 Le capteur doit mesurer des accélérations avec une incertitude de $\pm 50$g.  
 \\
-Est0ce que notre capteur fonctionne encore ?
+Est-ce que notre capteur fonctionne encore ?
 \\
 Si non, on propose un design modifié et on calcule ses performances. 
 
@@ -126,7 +160,6 @@ Si non, on propose un design modifié et on calcule ses performances.
 
 \section*{Utilisation de l'intelligence artificielle}
 Voici les outils d'intelligence artificielle et pour quel aspects précisément... 
-
 
 
 
