@@ -26,8 +26,9 @@ t_finger = 3.0   # épaisseur des doigts
 L_finger = 200.0 # longueur des doigts
 
 # --- Nombre et arrangement de doigts ---
-n_stator = 5     # doigts stator (fixes, +V0)
-n_rotor = 5      # doigts rotor (mobiles, 0V)
+N_paires = 8
+n_stator = N_paires     # doigts stator (fixes, +V0)
+n_rotor = N_paires      # doigts rotor (mobiles, 0V)
 # Les doigts s'alternent : stator-rotor-stator-rotor-...
 
 # --- Paramètres numériques ---
@@ -296,6 +297,24 @@ V_solution = solver.solve(
     check_convergence=check_convergence
 )
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 print(f"✓ Convergence atteinte après {n_iter} itérations\n")
 
 # --- 4. Capacité ---
@@ -307,11 +326,18 @@ print(f"  C_total = {C_total * 1e15:.4f} fF")
 print(f"  C/longueur = {C_total / (L_finger*1e-6) * 1e15:.6f} fF·m⁻¹")
 print()
 
+
+
+
+
 # --- 5. Modèle analytique pour comparaison ---
 eps0 = 8.854e-12
 n_pairs = min(n_stator, n_rotor)
 A_finger = L_finger * 1e-6 * t_finger * 1e-6
 C_ana = n_pairs * eps0 * A_finger / (d_gap * 1e-6)
+
+
+
 
 print(f"Modèle analytique (ε₀A/d)")
 print(f"─" * 70)
@@ -322,91 +348,57 @@ print(f"  C_ana = {C_ana * 1e15:.4f} fF")
 print(f"  Écart : {abs(C_total - C_ana)/C_ana*100:.1f}%")
 print()
 
+
+
+
+
+
+
+
+
+
+
+
 # ================================================================
 #  FIGURES
 # ================================================================
+fig = plt.figure(figsize=(14, 7))
+ax1 = fig.add_subplot(1, 1, 1)
 
-fig = plt.figure(figsize=(16, 5))
-
-# --- Figure 1 : Potentiel V(x,z) ---
-ax1 = fig.add_subplot(1, 3, 1)
+# NE PAS mettre set_aspect('equal') — laisser matplotlib étirer librement
+ax1.set_aspect('auto')
 
 im = ax1.contourf(
     x_axis, z_axis, V_solution,
     levels=50, cmap='RdBu_r'
 )
-plt.colorbar(im, ax=ax1, label='Potentiel V [V]')
+cbar = plt.colorbar(im, ax=ax1, label='Potentiel V [V]', fraction=0.03, pad=0.02)
 
-# Contours (lignes équipotentielles)
 contours = ax1.contour(
     x_axis, z_axis, V_solution,
     levels=15, colors='white', linewidths=0.4, alpha=0.5
 )
 
-# Streamlines (lignes de champ)
 res_m = res * 1e-6
 Ex = -np.gradient(V_solution, res_m, axis=1)
 Ez = -np.gradient(V_solution, res_m, axis=0)
 X, Y = np.meshgrid(x_axis, z_axis)
-ax1.streamplot(X, Y, Ex, Ez,  color='yellow', linewidth=0.5, density=0.8, arrowsize=0.8)
+ax1.streamplot(X, Y, Ex, Ez, color='yellow', linewidth=0.5, density=0.8, arrowsize=0.8)
 
 # Overlay des doigts
-z_finger_start = margin
-z_finger_end = margin + L_finger
-
 for finger in geom.fingers:
     x_start = finger['x_start']
-    x_end = finger['x_end']
-    color = '#0066CC' if finger['type'] == 0 else '#CC0000'
-    ax1.axvline(x_start, ymin=(z_finger_start/geom.Lz), 
-                ymax=(z_finger_end/geom.Lz), color=color, lw=2.5, alpha=0.7)
-    ax1.axvline(x_end, ymin=(z_finger_start/geom.Lz), 
-                ymax=(z_finger_end/geom.Lz), color=color, lw=2.5, alpha=0.7)
+    x_end   = finger['x_end']
+    color   = '#0066CC' if finger['type'] == 0 else '#CC0000'
+    ax1.axvspan(x_start, x_end, ymin=margin/geom.Lz,
+                ymax=(margin + L_finger)/geom.Lz, color=color, alpha=0.25)
 
 ax1.set_xlabel('x [µm]  (direction du mouvement)')
 ax1.set_ylabel('z [µm]  (longueur des doigts)')
 ax1.set_title(f'Potentiel V(x,z) — {n_iter} itérations\n'
-              f'd={d_gap:.1f}µm, t={t_finger:.1f}µm, {n_stator} stator + {n_rotor} rotor')
-ax1.set_aspect('equal')
-
-# --- Figure 2 : Erreur de convergence ---
-if check_convergence and solver.errors:
-    ax2 = fig.add_subplot(1, 3, 2)
-    ax2.semilogy(solver.errors, 'o-', markersize=2, lw=1, color='steelblue')
-    ax2.set_xlabel('Itération')
-    ax2.set_ylabel('Erreur MSE [V²]')
-    ax2.set_title('Convergence')
-    ax2.grid(True, alpha=0.3)
-
-# --- Figure 3 : Coupe 1D du potentiel ---
-ax3 = fig.add_subplot(1, 3, 3)
-
-# Coupe au milieu (z = L/2)
-z_mid_idx = geom.nz // 2
-V_cut = V_solution[z_mid_idx, :]
-
-ax3.plot(x_axis, V_cut, 'o-', markersize=4, lw=1.5, color='darkgreen', label='V(x)')
-ax3.axhline(0, color='gray', ls=':', lw=0.8)
-ax3.axhline(V0, color='gray', ls=':', lw=0.8)
-
-# Overlay des positions des doigts
-z_finger_start = margin
-z_finger_end = margin + L_finger
-for finger in geom.fingers:
-    x_start = finger['x_start']
-    x_end = finger['x_end']
-    color = '#0066CC' if finger['type'] == 0 else '#CC0000'
-    alpha = 0.3
-    ax3.axvspan(x_start, x_end, alpha=alpha, color=color)
-
-ax3.set_xlabel('x [µm]')
-ax3.set_ylabel(f'V (coupe à z ≈ {z_axis[z_mid_idx]:.1f} µm) [V]')
-ax3.set_title('Potentiel 1D — coupe transversale')
-ax3.legend()
-ax3.grid(True, alpha=0.3)
+              f'd={d_gap:.1f}µm, t={t_finger:.1f}µm, '
+              f'{n_stator} stator + {n_rotor} rotor')
 
 plt.tight_layout()
 plt.savefig('mems_laplace_2d.png', dpi=150, bbox_inches='tight')
 plt.show()
-
-print("\n✓ Figure sauvegardée : mems_laplace_2d.png")
