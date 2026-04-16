@@ -1,24 +1,26 @@
 import numpy as np
 import matplotlib.pyplot as plt
+plt.style.use('fast') # fait en sorte que ça devrait moins bugger
 
 # Constantes ---- en µm
-N_pairs = 20 # nombre de paires de doigts [µm] 50
+# N_pairs = 20 # nombre de paires de doigts [µm] 50
+N_pairs = 4 # nombre de paires de doigts [µm] 50
 Y_gap = 4 # gap size entre les doigts [µm] (d)
 X_width = 2 # largeur des doigts [µm] (h)
 L_finger = 100 # longueur des doigts [µm] (l)
 m = 2 # masse d'épreuve [kg]
 k = 2 # constante du ressort [N/m]
 epsilon_0 = 8.854e-12 
-# res = 0.1  # résolution [µm/pixel]
+# res = 2  # résolution [µm/pixel]
 res = 0.3  # résolution [µm/pixel]
 iters = 2000 # nombre d'itérations voulues 
-margin = 1 #starting the graph at not zero
+margin = 0 #starting the graph at not zero
 
 
-centres = (
-    margin + np.arange(2 * N_pairs) * Y_gap
-)  # position en y des centres des doigts
-Ly, Lx, Lz = centres[-1] + margin, X_width + 2 * margin, L_finger + 2 * margin
+centres = (margin + np.arange(2 * N_pairs) * Y_gap)  # position en y des centres des doigts
+Ly = centres[-1] + margin + Y_gap
+Lx = X_width + 2 * margin + (1 * res if margin == 0 else 0)
+Lz = L_finger + 2 * margin + (1 * res if margin == 0 else 0)
 ny, nx, nz = (
     int(Ly / res),
     int(Lx / res),
@@ -29,12 +31,14 @@ vol_stator = np.zeros((nz, nx, ny), dtype=bool) # genre de matrice en 3D (tenseu
 vol_rotor = np.zeros((nz, nx, ny), dtype=bool)
 
 # indices limites 
-x_s, x_e = int(margin / res), int((margin + X_width) / res)
-y_s, y_e = int(margin / res), int(centres[-1] / res)
-z_s, z_e = int(margin / res), int((margin + L_finger) / res) # indices en z start, z end...
+x_s, x_e = 0, min(int(margin + X_width / res) , nx - 1)
+y_s, y_e = 0, min(int(centres[-1] / res), ny - 1)
+z_s, z_e = 0, min(int(margin + L_finger  / res), nz - 1) # indices en z start, z end...
+# x_s, x_e = 0, nx - 1
+# y_s, y_e = 0, ny - 1
+# z_s, z_e = 0, nz # indices en z start, z end...
 
-slice_z = slice(z_s, z_e) # on prend une coupe en z 
-slice_x = slice(x_s, x_e)
+slice_x = slice(x_s, x_e + 1)
 slice_y = slice(y_s, y_e + 1)
 
 # base stator en rouge 
@@ -43,7 +47,7 @@ vol_stator[z_s, slice_x, slice_y] = True # on ajoute une plaque à la base
 vol_rotor[z_e, slice_x, slice_y] = True
 
 for i, y_pos in enumerate(centres):
-    y_idx = int(y_pos / res)
+    y_idx = min(int(y_pos / res), ny - 1)
     if i % 2 == 0: # on alterne rouge / bleu
         vol_stator[z_s:z_e, slice_x, y_idx] = True  
     else:
@@ -89,15 +93,14 @@ colors[vol_stator] = "red"
 colors[vol_rotor] = "blue"
 for vol, color in [(vol_stator, 'red'), (vol_rotor, 'blue')]:
     z_idx, x_idx, y_idx = np.where(vol)
-# L'appel se fait sur 'ax', pas sur 'fig'
-# ax.voxels(voxels, facecolors=colors, edgecolor="k", linewidth=0, alpha=1) -------------------------
+# ax.voxels(voxels, facecolors=colors, edgecolor=None, linewidth=0, alpha=1) 
 
 # Configuration des titres et labels
 ax.set_title("Géométrie 3D : Plaques et Doigts Interdigités")
 ax.set_xlabel("Z (Longueur)")
 ax.set_ylabel("X (Épaisseur)")
 ax.set_zlabel("Y (Déploiement)")
-# ax.set_box_aspect([nz, nx, ny]) # fait des carrés 
+ax.set_box_aspect([nz, nx, ny]) # fait des carrés 
 
 # Choisir une couche en x (milieu du doigt par exemple)
 x_slice = 1
@@ -109,13 +112,14 @@ plt.imshow(
     cmap='plasma',
     origin='lower',
     extent=[0, Ly, 0, Lz],
-    aspect='auto'
+    aspect='equal' # auto
 )
 plt.colorbar(label="Potentiel V")
 plt.xlabel("y [µm]")
 plt.ylabel("z [µm]")
 plt.title(f"Potentiel — coupe x = {x_slice}")
 plt.tight_layout()
+plt.gca().set_aspect('equal', adjustable='box') # pour faire des carrés 
 
  
 # --- Champ électrique 3D ---
@@ -142,15 +146,19 @@ fig, ax = plt.subplots(figsize=(12, 5))
  
 im = ax.contourf(Y, Z, V_2d, levels=60, cmap='plasma')
 plt.colorbar(im, ax=ax, label='Potentiel V [V]')
+plt.gca().set_aspect('equal', adjustable='box') # pour faire des carrés 
  
 ax.contour(Y, Z, V_2d, levels=15, colors='white', linewidths=0.5, alpha=0.6)
  
-step = max(1, int(0.005 * max(ny, nz)))
+n_arrows = 100  # densité + flèches 
+step_y = max(1, ny // n_arrows)
+step_z = max(1, nz // n_arrows)
+
 ax.quiver(
-    Y [::step, ::step],
-    Z [::step, ::step],
-    Ey_2d[::step, ::step],
-    Ez_2d[::step, ::step],
+    Y [::step_z, ::step_y],
+    Z [::step_z, ::step_y],
+    Ey_2d[::step_z, ::step_y],
+    Ez_2d[::step_z, ::step_y],
     color='white', alpha=0.8,
     scale=None, width=0.003,
     headwidth=2, headlength=4,
