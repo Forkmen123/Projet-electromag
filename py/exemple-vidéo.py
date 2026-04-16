@@ -3,29 +3,19 @@ import matplotlib.pyplot as plt
 from scipy.ndimage import convolve, generate_binary_structure
 
 
-
 N = 100
 grid = np.zeros((N,N,N))+0.5
-
-
 
 grid[30:70,30:70,20] = 1
 grid[30:70,30:70,80] = 0
 mask_pos = grid==1
 mask_neg = grid==0
 
-
-
 yv, xv, zv = np.meshgrid(np.arange(N),np.arange(N),np.arange(N))
-#grid = 1-zv/100
-
-
+grid = 1-zv/100
 
 kern = generate_binary_structure(3,1).astype(float)/6
 kern[1,1,1] = 0
-
-
-
 
 def neumann(a):
     a[0,:,:] = a[1,:,:]; a[-1,:,:] = a[-2,:,:]
@@ -33,10 +23,8 @@ def neumann(a):
     a[:,:,0] = a[:,:,1]; a[:,:,-1] = a[:,:,-2]
     return a
 
-
-
 err = []
-iters = 2000
+iters = 200
 for i in range(iters):
     grid_updated = convolve(grid,kern, mode='constant')
     # Boundary conditions (neumann)
@@ -49,7 +37,6 @@ for i in range(iters):
     grid = grid_updated
 
 slc = 40
-
 
 
 x = np.linspace(0, 1, grid.shape[1])
