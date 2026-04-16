@@ -17,7 +17,7 @@ Nx, Ny = 100, 100
 V = np.zeros((Nx, Ny))
 
 
-
+#ceci n'est qu'un test que j'ai essayé de faire avec claude -Anakin
 V[0:3, 10:120] = 1.0
 V[0:3, 20:130] = -1.0
 
@@ -40,18 +40,6 @@ plt.colorbar(label='V')
 plt.title('Potential field')
 plt.show()
 
-# ri = np.linspace(0,1,500)
-
-# liste = []
-# C_tot = 0
-# for i in range(int(N/2)): # on fait / 2 parce que c'est symétrique
-#     for j in range(i, N):
-#         liste.append((i, j))
-#         distance = abs(j-i) * (D / 2)
-#         delta_d = (m * a) / (k)
-#         C_tot += (l * h * epsilon_0) / (distance - delta_d)
-                    
-# print(sp.simplify(C_tot))
 
 
 
