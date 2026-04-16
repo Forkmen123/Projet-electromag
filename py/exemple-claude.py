@@ -1,342 +1,293 @@
-"""
-Simulation MEMS capacitif — Méthode de relaxation 2D (Laplace)
-================================================================
-PHY-1007 · Projet capteur MEMS capacitif · Université Laval
-
-GÉOMÉTRIE SIMULÉE
------------------
-On regarde une coupe transversale (plan xz) d'une paire de doigts :
-
-        stator (+V0)      rotor (0 V)
-             |                |
-    z ▲  ----+----    gap    ----+----
-      |      |    <--- d --->    |
-      |      |                   |
-      +---> x  (direction du mouvement)
-
-  x = direction du déplacement de la masse
-  z = épaisseur des doigts (t)
-  y = longueur des doigts L  ← hors plan, multiplicateur après
-
-La longueur L est prise en compte en multipliant C/longueur × L.
-
-DÉPENDANCES
------------
-    pip install numpy matplotlib scipy
-"""
-
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib.colors import TwoSlopeNorm
-from scipy.ndimage import convolve
+
+plt.style.use('fast')
 
 # ================================================================
-#  PARAMÈTRES — modifie uniquement cette section
+#  CONSTANTES ---- en µm et unités SI
 # ================================================================
-
-# --- Géométrie des doigts [µm] ---
-d0    = 2.0    # gap nominal entre les faces au repos        [µm]
-t     = 3.0    # épaisseur (hauteur dans la coupe) des doigts [µm]
-L     = 200.0  # longueur des doigts                         [µm]
-
-# --- Peigne interdigité ---
-N_pairs = 50   # nombre de paires de doigts (rotor/stator)
-
-# --- Circuit ---
-V0 = 3.0       # tension appliquée entre stator et rotor     [V]
-
-# --- Mécanique ---
-m = 1.0e-9     # masse d'épreuve  [kg]  (ex: 1 µg = 1e-9 kg)
-k = 1.0        # constante de rappel [N/m]
-
-# --- Accélérations à évaluer ---
-a_min, a_max, n_pts = -40.0, 40.0, 17   # [g]
-
-# --- Paramètres numériques ---
-dx     = 0.25    # résolution de la grille        [µm/pixel]
-                 # ↑ diminuer pour plus de précision (plus lent)
-margin = 6.0     # marge vide autour des doigts   [µm]
-n_iter = 3000    # itérations de relaxation pour la visualisation
-n_iter_fast = 1500  # itérations pour la courbe C(a) (plus rapide)
+N_pairs  = 4      # nombre de paires de doigts
+Y_gap    = 4.0    # gap entre doigts [µm]
+X_width  = 2.0    # épaisseur des doigts [µm]
+L_finger = 20.0   # longueur des doigts [µm]
+m_mass   = 0.00002# masse d'épreuve [kg]   ← nommé m_mass pour éviter conflit
+k_spring = 2.0    # constante du ressort [N/m]
+V0       = 3.0    # tension stator [V]
+epsilon_0 = 8.854e-12  # [F/m]
+res      = 0.3    # résolution [µm/pixel]
+iters    = 3000   # nombre d'itérations
 
 # ================================================================
-#  CONSTANTES PHYSIQUES
+#  GÉOMÉTRIE SANS MARGE
+#  
+#  CHANGEMENT 1 : centres commence à Y_gap/2 (pas à margin)
+#  → le premier doigt n'est pas collé au bord
 # ================================================================
-eps0 = 8.854e-12   # permittivité du vide [F/m]
-g_si = 9.81        # [m/s²]
+centres = Y_gap / 2 + np.arange(2 * N_pairs) * Y_gap
+# centres[0] = Y_gap/2, centres[1] = 3*Y_gap/2, ...
+# Alternance : pair=stator, impair=rotor
 
-# ================================================================
-#  FONCTIONS
-# ================================================================
+# CHANGEMENT 2 : Ly, Lx, Lz sans margin
+# On ajoute Y_gap/2 de chaque côté pour symmétrie
+Ly = centres[-1] + Y_gap / 2   # [µm]
+Lx = X_width                    # [µm]  ← juste l'épaisseur du doigt
+Lz = L_finger                   # [µm]  ← juste la longueur du doigt
 
-def build_grid(d_um):
-    """
-    Construit la grille 2D pour un gap d_um (µm).
+ny = int(round(Ly / res))
+nx = int(round(Lx / res))
+nz = int(round(Lz / res))
 
-    Retourne
-    --------
-    V        : ndarray (nz, nx)  potentiel initial (0 partout sauf conducteurs)
-    mask_pos : ndarray bool      pixels du stator  (+V0)
-    mask_neg : ndarray bool      pixels du rotor   ( 0 V)
-    nx, nz   : int               dimensions de la grille
-    """
-    Lx = d_um + 2 * margin   # largeur du domaine [µm]
-    Lz = t    + 2 * margin   # hauteur du domaine [µm]
-
-    nx = max(4, int(round(Lx / dx)))
-    nz = max(4, int(round(Lz / dx)))
-
-    V = np.zeros((nz, nx))
-
-    # Positions en pixels
-    ix_s = int(round(margin       / dx))   # colonne stator
-    ix_r = int(round((margin+d_um)/ dx))   # colonne rotor
-    iz_b = int(round(margin       / dx))   # bas  du doigt
-    iz_t = int(round((margin + t) / dx))   # haut du doigt
-
-    # Masques
-    mask_pos = np.zeros((nz, nx), dtype=bool)
-    mask_neg = np.zeros((nz, nx), dtype=bool)
-    mask_pos[iz_b:iz_t+1, ix_s] = True
-    mask_neg[iz_b:iz_t+1, ix_r] = True
-
-    V[mask_pos] = +V0
-    V[mask_neg] =  0.0
-
-    return V, mask_pos, mask_neg, nx, nz
-
-
-def relax_laplace(V, mask_pos, mask_neg, n_iter):
-    """
-    Résout ∇²V = 0 par la méthode de relaxation.
-
-    À chaque itération :
-      1. On convolve V avec le noyau K = [[0,1,0],[1,0,1],[0,1,0]] / 4
-         → chaque pixel devient la moyenne de ses 4 voisins
-         → c'est exactement la discrétisation de ∇²V = 0 sur grille carrée
-      2. On réimpose les conditions aux limites (conducteurs fixes)
-
-    Convergence : les variations entre itérations → 0 quand V satisfait Laplace.
-    """
-    K = np.array([[0, 1, 0],
-                  [1, 0, 1],
-                  [0, 1, 0]], dtype=float) / 4.0
-
-    for _ in range(n_iter):
-        V = convolve(V, K, mode='nearest')  # Neumann BC aux bords du domaine
-        V[mask_pos] = +V0                   # stator maintenu à +V0
-        V[mask_neg] =  0.0                  # rotor maintenu à 0 V
-
-    return V
-
-
-def capacitance_energy(V, dx):
-    """
-    Calcule la capacité totale via la méthode de l'énergie électrostatique.
-
-    Principe
-    --------
-    L'énergie stockée dans le champ électrique (par unité de longueur en y) :
-        u = (ε₀/2) ∫∫ |E|² dx dz      [J/m]
-
-    Pour un condensateur :  u = C_per_length × V0² / 2
-    Donc :  C_per_length = ε₀ ∫∫ |E|² dx dz / V0²   [F/m]
-
-    Avantage : inclut automatiquement les effets de frange (champ qui déborde
-    aux bouts des doigts), contrairement à la formule ε₀A/d.
-
-    Retourne C_total [F] pour N_pairs paires de longueur L.
-    """
-    dx_m = dx * 1e-6        # µm → m
-
-    # Champ électrique : E = -∇V (différences centrées par np.gradient)
-    Ex = -np.gradient(V, dx_m, axis=1)   # composante x  [V/m]
-    Ez = -np.gradient(V, dx_m, axis=0)   # composante z  [V/m]
-
-    E_sq = Ex**2 + Ez**2                 # |E|²  [V²/m²]
-
-    # Intégrale numérique sur le domaine (surface élémentaire = dx_m²)
-    u = 0.5 * eps0 * np.sum(E_sq) * dx_m**2    # [J/m]
-
-    C_per_length = 2 * u / V0**2               # [F/m]
-    C_one_pair   = C_per_length * L * 1e-6     # [F]  (× longueur L en m)
-
-    return N_pairs * C_one_pair                 # [F]  (× nombre de paires)
-
-
-def compute_C_vs_a(a_g_list, n_it):
-    """
-    Calcule C(a) pour une liste d'accélérations [g].
-    Retourne deux tableaux : a_valid [g] et C_valid [F].
-    """
-    a_out, C_out = [], []
-    for a_g in a_g_list:
-        x    = m * (a_g * g_si) / k        # déplacement [m]
-        d_m  = d0 * 1e-6 - x               # gap réel    [m]
-        d_um = d_m * 1e6                   # gap réel    [µm]
-
-        if d_um <= dx * 0.6:
-            print(f"  {a_g:+6.1f} g → collision (d = {d_um*1000:.0f} nm < résolution)")
-            continue
-
-        V, mp, mn, *_ = build_grid(d_um)
-        V = relax_laplace(V, mp, mn, n_it)
-        C = capacitance_energy(V, dx)
-
-        a_out.append(a_g)
-        C_out.append(C)
-        print(f"  {a_g:+6.1f} g  d = {d_um:.3f} µm  C = {C*1e15:.3f} fF")
-
-    return np.array(a_out), np.array(C_out)
-
+print(f"Grille : nz={nz}, nx={nx}, ny={ny}  ({nz*nx*ny/1e6:.2f}M pixels)")
+print(f"Domaine : Ly={Ly:.1f} µm, Lx={Lx:.1f} µm, Lz={Lz:.1f} µm")
 
 # ================================================================
-#  SIMULATION PRINCIPALE
+#  MASQUES
+#
+#  CHANGEMENT 3 : x_s=0, x_e=nx-1 (tout le domaine en x)
+#  CHANGEMENT 4 : z_s=0, z_e=nz-1 (tout le domaine en z)
+#  CHANGEMENT 5 : pas de plaques de base (elles causaient des
+#                 problèmes aux bords avec np.roll périodique)
 # ================================================================
+vol_stator = np.zeros((nz, nx, ny), dtype=bool)
+vol_rotor  = np.zeros((nz, nx, ny), dtype=bool)
 
-print("=" * 60)
-print(" Simulation MEMS — méthode de relaxation 2D (Laplace)")
-print("=" * 60)
-print(f"\nParamètres :")
-print(f"  gap nominal d0 = {d0} µm   ({int(round(d0/dx))} pixels dans le gap)")
-print(f"  épaisseur t    = {t} µm")
-print(f"  longueur L     = {L} µm")
-print(f"  paires N       = {N_pairs}")
-print(f"  résolution dx  = {dx} µm\n")
+slice_x = slice(0, nx)   # tout le domaine en x
+# Doigts s'étendent sur toute la hauteur z (pas de plaques de base)
+z_s = 0
+z_e = nz
 
-# --- 1. Simulation au repos (a = 0) ---
-print("--- Simulation au repos (a = 0) ---")
-V_init, mp0, mn0, nx0, nz0 = build_grid(d0)[:5]
-V_solved = relax_laplace(V_init, mp0, mn0, n_iter)
+for i, y_pos in enumerate(centres):
+    y_idx = int(round(y_pos / res))
+    y_idx = np.clip(y_idx, 0, ny - 1)
+    if i % 2 == 0:
+        vol_stator[z_s:z_e, slice_x, y_idx] = True
+    else:
+        vol_rotor [z_s:z_e, slice_x, y_idx] = True
 
-C0_sim = capacitance_energy(V_solved, dx)
-C0_ana = N_pairs * eps0 * (L * 1e-6) * (t * 1e-6) / (d0 * 1e-6)
+print(f"Pixels stator : {vol_stator.sum()}")
+print(f"Pixels rotor  : {vol_rotor.sum()}")
 
-print(f"  C0 simulation  = {C0_sim * 1e15:.3f} fF")
-print(f"  C0 analytique  = {C0_ana * 1e15:.3f} fF")
-print(f"  Écart relatif  = {abs(C0_sim - C0_ana) / C0_ana * 100:.1f}%")
-print(f"  (l'écart reflète les effets de frange captés par la simulation)\n")
+# ================================================================
+#  POTENTIEL ET RELAXATION
+# ================================================================
+potential = np.full((nz, nx, ny), V0 / 2.0)  # init à V0/2
+potential[vol_stator] = V0
+potential[vol_rotor]  = 0.0
 
-# --- 2. Sensibilité analytique ---
-dCda_ana = N_pairs * eps0 * (L*1e-6) * (t*1e-6) * m / (k * (d0*1e-6)**2)
-print(f"  Sensibilité analytique dC/da = {dCda_ana * 1e15:.4f} fF·s²/m")
-print(f"                               = {dCda_ana * 1e15 / g_si:.4f} fF/g\n")
+is_free = ~(vol_stator | vol_rotor)
 
-# --- 3. Courbe C(a) ---
-print("--- Calcul C(a) ---")
-a_list = np.linspace(a_min, a_max, n_pts)
-a_valid, C_valid = compute_C_vs_a(a_list, n_iter_fast)
+for i in range(iters):
+    v_avg = (
+        np.roll(potential,  1, axis=0)
+      + np.roll(potential, -1, axis=0)
+      + np.roll(potential,  1, axis=1)
+      + np.roll(potential, -1, axis=1)
+      + np.roll(potential,  1, axis=2)
+      + np.roll(potential, -1, axis=2)
+    ) / 6.0
 
-# ΔV si le condensateur est déconnecté après charge à V0
-# Q = C0 * V0  →  V(a) = Q / C(a) = V0 * C0 / C(a)
-# ΔV = V(a) - V0 = V0 * (C0/C(a) - 1)
-dV_valid = V0 * (C0_sim / C_valid - 1)
+    potential[is_free] = v_avg[is_free]
 
-# Sensibilité numérique autour de a = 0
-idx0 = np.argmin(np.abs(a_valid))
-da_m = (a_valid[1] - a_valid[0]) * g_si if len(a_valid) > 1 else 1
-if idx0 > 0 and idx0 < len(C_valid) - 1:
-    dCda_num = (C_valid[idx0+1] - C_valid[idx0-1]) / (2 * da_m)
-    print(f"\n  Sensibilité numérique dC/da  = {dCda_num * 1e15:.4f} fF·s²/m")
-    print(f"                               = {dCda_num * 1e15 / g_si:.4f} fF/g")
+    # Conditions aux frontières Dirichlet en z
+    potential[0,  :, :] = 0.0   # bas  → V = 0 V  (stator)
+    potential[-1, :, :] = V0    # haut → V = V0    (rotor)
+
+    # Les doigts (Dirichlet) sont déjà dans is_free=False,
+    # donc ils ne sont pas écrasés par v_avg
+    if i % 500 == 0:
+        print(f'  Relaxation {i}/{iters}')
+
+# ================================================================
+#  CHAMP ÉLECTRIQUE 3D
+# ================================================================
+y_axis = np.linspace(0, Ly, ny)
+z_axis = np.linspace(0, Lz, nz)
+x_axis = np.linspace(0, Lx, nx)
+
+grad_z, grad_x, grad_y = np.gradient(potential, z_axis, x_axis, y_axis)
+Ex = -grad_x
+Ey = -grad_y
+Ez = -grad_z
+
+# ================================================================
+#  CAPACITÉ PAR INTÉGRALE DE FLUX (GAUSS)
+# ================================================================
+def compute_capacitance(potential_2d, vol_stator_2d, res_m, L_x_m, V0, epsilon_0):
+    """
+    C = epsilon_0 * (flux de E autour du stator) * L_x / V0
+
+    On somme E·n sur chaque face de pixel voisin du stator.
+    potential_2d : shape (nz, ny)
+    vol_stator_2d : shape (nz, ny), bool
+    """
+    grad_z2, grad_y2 = np.gradient(potential_2d, res_m, res_m)
+    Ey2 = -grad_y2
+    Ez2 = -grad_z2
+
+    flux = 0.0
+    z_idxs, y_idxs = np.where(vol_stator_2d)
+
+    for z, y in zip(z_idxs, y_idxs):
+        nz2, ny2 = potential_2d.shape
+        if z+1 < nz2 and not vol_stator_2d[z+1, y]:
+            flux += Ez2[z+1, y] * res_m
+        if z-1 >= 0  and not vol_stator_2d[z-1, y]:
+            flux -= Ez2[z-1, y] * res_m
+        if y+1 < ny2 and not vol_stator_2d[z, y+1]:
+            flux += Ey2[z, y+1] * res_m
+        if y-1 >= 0  and not vol_stator_2d[z, y-1]:
+            flux -= Ey2[z, y-1] * res_m
+
+    Q_per_length = epsilon_0 * flux          # [C/m]
+    C = abs(Q_per_length) * L_x_m / V0      # [F]
+    return C
+
+
+# Example: Flux of E = <0, 0, 10> through a 1x1 flat surface in xy-plane
+# Surface area element dA points in z-direction: <0, 0, dA>
+def electric_field(x, y, z):
+    return np.array([0, 0, 10])
+
+# Discretize surface
+x_coords = np.linspace(0, 1, 10)
+y_coords = np.linspace(0, 1, 10)
+dx = x_coords[1] - x_coords[0]
+dy = y_coords[1] - y_coords[0]
+da_scalar = dx * dy
+
+total_flux = 0
+for x in x_coords:
+    for y in y_coords:
+        # dA vector pointing in +z
+        da_vec = np.array([0, 0, da_scalar])
+        e_vec = electric_field(x, y, 0)
+        total_flux += np.dot(e_vec, da_vec)
+
+print(f"Total Electric Flux: {total_flux}")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+x_slice   = nx // 2
+V_2d      = potential[:, x_slice, :]
+stator_2d = vol_stator[:, x_slice, :]
+
+C0 = compute_capacitance(V_2d, stator_2d, res * 1e-6, Lx * 1e-6, V0, epsilon_0)
+print(f"\nCapacité C0 (simulation) = {C0 * 1e15:.4f} fF")
+
+# Comparaison analytique
+# C_ana = N_pairs * epsilon_0 * (L_finger * 1e-6) * (X_width * 1e-6) / (Y_gap * 1e-6)
+# print(f"Capacité C0 (analytique ε₀A/d) = {C_ana * 1e15:.4f} fF")
+# print(f"Écart : {abs(C0 - C_ana)/C_ana * 100:.1f}%")
+
+# ================================================================
+#  dC/da PAR BALAYAGE D'ACCÉLÉRATIONS
+# ================================================================
+g_si   = 9.81          # [m/s²]
+d0_m   = Y_gap * 1e-6  # gap nominal [m]
+
+accs   = np.linspace(-5, 5, 11)  # [g]  ← plage réduite pour test
+caps   = []
+
+print(f"\nCalcul C(a)...")
+for a_g in accs:
+    x_disp = m_mass * (a_g * g_si) / k_spring   # déplacement [m]
+    d_new  = d0_m - x_disp                        # nouveau gap [m]
+
+    if d_new <= res * 1e-6:
+        print(f"  a={a_g:+.1f}g → collision (d={d_new*1e6:.2f} µm)")
+        caps.append(np.nan)
+        continue
+
+    # Capacité analytique pour ce gap (rapide, sans re-simuler)
+    C_a = N_pairs * epsilon_0 * (L_finger * 1e-6) * (X_width * 1e-6) / d_new
+    caps.append(C_a)
+    print(f"  a={a_g:+.1f}g  d={d_new*1e6:.2f}µm  C={C_a*1e15:.3f}fF")
+
+caps = np.array(caps)
+
+# Dérivée numérique par différence finie
+dC_da = np.gradient(caps, accs * g_si)   # [F·s²/m]
+
+idx0 = len(accs) // 2
+print(f"\ndC/da à a=0 : {dC_da[idx0]*1e15:.4f} fF·s²/m")
+print(f"           = {dC_da[idx0]*1e15/g_si:.4f} fF/g")
+
+# Analytique pour vérification
+dC_da_ana = N_pairs * epsilon_0 * (L_finger*1e-6) * (X_width*1e-6) * m_mass / (k_spring * d0_m**2)
+print(f"\ndC/da analytique : {dC_da_ana*1e15/g_si:.4f} fF/g")
 
 # ================================================================
 #  FIGURES
 # ================================================================
-fig = plt.figure(figsize=(16, 5))
+fig, axes = plt.subplots(1, 3, figsize=(15, 5))
 
-# ---- Figure 1 : Potentiel V(x,z) ----
-ax1 = fig.add_subplot(1, 3, 1)
-
-Lx_um = d0 + 2 * margin
-Lz_um = t  + 2 * margin
-extent = [0, Lx_um, 0, Lz_um]
-
-im = ax1.imshow(
-    V_solved, origin='lower', extent=extent,
-    cmap='RdBu_r', norm=TwoSlopeNorm(vmin=0, vcenter=V0/2, vmax=V0),
-    interpolation='bilinear'
+# --- 1. Potentiel ---
+ax = axes[0]
+im = ax.contourf(
+    np.linspace(0, Ly, ny),
+    np.linspace(0, Lz, nz),
+    V_2d, levels=60, cmap='plasma'
 )
-plt.colorbar(im, ax=ax1, label='Potentiel V [V]', shrink=0.85)
-
-# Lignes équipotentielles
-X_vec = np.linspace(0, Lx_um, nx0)
-Z_vec = np.linspace(0, Lz_um, nz0)
-XX, ZZ = np.meshgrid(X_vec, Z_vec)
-ax1.contour(XX, ZZ, V_solved, levels=12, colors='white',
-            linewidths=0.6, alpha=0.7)
-
-# Lignes de champ électrique (streamlines)
-Ex_plot = -np.gradient(V_solved, axis=1)
-Ez_plot = -np.gradient(V_solved, axis=0)
-ax1.streamplot(XX, ZZ, Ex_plot, Ez_plot, color='yellow',
-               linewidth=0.6, density=1.0, arrowsize=0.8)
-
-# Doigts
-frac_bot = margin / Lz_um
-frac_top = (margin + t) / Lz_um
-ax1.axvline(margin,      ymin=frac_bot, ymax=frac_top, color='#5599FF', lw=3,
-            label=f'Stator (+{V0} V)')
-ax1.axvline(margin + d0, ymin=frac_bot, ymax=frac_top, color='#FF5555', lw=3,
-            label='Rotor (0 V)')
-
-ax1.set_xlabel('x [µm]  (direction du mouvement)')
-ax1.set_ylabel('z [µm]  (épaisseur)')
-ax1.set_title(
-    f'Potentiel V(x,z) au repos\n'
-    f'd₀={d0} µm, t={t} µm, {n_iter} itérations'
+plt.colorbar(im, ax=ax, label='V [V]')
+ax.contour(
+    np.linspace(0, Ly, ny),
+    np.linspace(0, Lz, nz),
+    V_2d, levels=15, colors='white', linewidths=0.5, alpha=0.5
 )
-ax1.legend(fontsize=8, loc='upper right')
+ax.set_xlabel('y [µm]'); ax.set_ylabel('z [µm]')
+ax.set_title('Potentiel V(y,z)')
+ax.set_aspect('equal')
 
-# ---- Figure 2 : C(a) simulation vs analytique ----
-ax2 = fig.add_subplot(1, 3, 2)
+# Marque les doigts
+for i, y_pos in enumerate(centres):
+    color = 'cyan' if i % 2 == 0 else 'lime'
+    ax.axvline(y_pos, color=color, lw=1.5, alpha=0.7,
+               label='stator' if i == 0 else ('rotor' if i == 1 else ''))
+ax.legend(fontsize=8)
 
-a_fine = np.linspace(a_valid[0], a_valid[-1], 300)
-x_fine = m * a_fine * g_si / k
-d_fine = d0 * 1e-6 - x_fine
-C_ana_fine = N_pairs * eps0 * (L*1e-6) * (t*1e-6) / d_fine
+# --- 2. Potentiel + champ ---
+ax = axes[1]
+Y2d, Z2d = np.meshgrid(np.linspace(0, Ly, ny), np.linspace(0, Lz, nz))
+Ey_2d = Ey[:, x_slice, :]
+Ez_2d = Ez[:, x_slice, :]
 
-ax2.plot(a_fine, C_ana_fine * 1e15, 'k--', lw=1.8,
-         label='Analytique  ε₀A/d')
-ax2.plot(a_valid, C_valid * 1e15, 'o-', color='steelblue',
-         ms=5, lw=1.5, label='Simulation (Laplace)')
-ax2.axhline(C0_sim * 1e15, color='gray', lw=0.8, ls=':', alpha=0.7,
-            label=f'C₀ = {C0_sim*1e15:.2f} fF')
-ax2.axvline(0, color='gray', lw=0.8, ls=':', alpha=0.5)
+im2 = ax.contourf(Y2d, Z2d, V_2d, levels=60, cmap='plasma')
+plt.colorbar(im2, ax=ax, label='V [V]')
 
-ax2.set_xlabel('Accélération [g]')
-ax2.set_ylabel('Capacité [fF]')
-ax2.set_title('C(a) — simulation vs analytique')
-ax2.legend(fontsize=9)
-ax2.grid(True, alpha=0.3)
-
-# ---- Figure 3 : ΔV(a) ----
-ax3 = fig.add_subplot(1, 3, 3)
-
-dV_ana_fine = V0 * (C0_ana / C_ana_fine - 1)
-
-ax3.plot(a_fine,  dV_ana_fine  * 1e3, 'k--', lw=1.8, label='Analytique')
-ax3.plot(a_valid, dV_valid     * 1e3, 'o-',  color='darkorange',
-         ms=5, lw=1.5, label='Simulation')
-ax3.axhline(0, color='gray', lw=0.8, alpha=0.5)
-ax3.axvline(0, color='gray', lw=0.8, alpha=0.5)
-
-ax3.set_xlabel('Accélération [g]')
-ax3.set_ylabel('ΔV [mV]')
-ax3.set_title(
-    f'ΔV(a) — condensateur déconnecté\n'
-    f'(chargé à V₀ = {V0} V, Q = C₀V₀ constant)'
+n_arrows = 20
+step_y = max(1, ny // n_arrows)
+step_z = max(1, nz // n_arrows)
+ax.quiver(
+    Y2d[::step_z, ::step_y], Z2d[::step_z, ::step_y],
+    Ey_2d[::step_z, ::step_y], Ez_2d[::step_z, ::step_y],
+    color='white', alpha=0.8, scale=None, width=0.005,
 )
-ax3.legend(fontsize=9)
-ax3.grid(True, alpha=0.3)
+ax.set_xlabel('y [µm]'); ax.set_ylabel('z [µm]')
+ax.set_title('Champ E(y,z)')
+ax.set_aspect('equal')
+
+# --- 3. C(a) et dC/da ---
+ax = axes[2]
+valid = ~np.isnan(caps)
+ax.plot(accs[valid], caps[valid] * 1e15, 'o-', color='steelblue', label='C(a)')
+ax.set_xlabel('Accélération [g]')
+ax.set_ylabel('C [fF]', color='steelblue')
+ax2 = ax.twinx()
+ax2.plot(accs[valid], dC_da[valid] * 1e15 / g_si, 's--', color='crimson', label='dC/da')
+ax2.set_ylabel('dC/da [fF/g]', color='crimson')
+ax.set_title('C(a) et sensibilité dC/da')
+ax.grid(True, alpha=0.3)
 
 plt.tight_layout()
-plt.savefig('mems_simulation.png', dpi=150, bbox_inches='tight')
 plt.show()
-
-print("\nFigure sauvegardée : mems_simulation.png")
-print("\nRésumé :")
-print(f"  C0           = {C0_sim*1e15:.3f} fF  (simulation)")
-print(f"  C0           = {C0_ana*1e15:.3f} fF  (analytique ε₀A/d)")
-print(f"  dC/da        = {dCda_ana*1e15/g_si:.4f} fF/g  (analytique)")
-print(f"  ΔV max (±{a_valid[-1]:.0f}g) = {np.nanmax(np.abs(dV_valid))*1e3:.1f} mV")
