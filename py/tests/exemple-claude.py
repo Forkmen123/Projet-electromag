@@ -196,7 +196,7 @@ print(f"\nCapacité C0 (simulation) = {C0 * 1e15:.4f} fF")
 g_si   = 9.81          # [m/s²]
 d0_m   = Y_gap * 1e-6  # gap nominal [m]
 
-accs   = np.linspace(-5, 5, 11)  # [g]  ← plage réduite pour test
+accs   = np.linspace(5, 5, 11)  # [g]  ← plage réduite pour test
 caps   = []
 
 print(f"\nCalcul C(a)...")
@@ -291,3 +291,52 @@ ax.grid(True, alpha=0.3)
 
 plt.tight_layout()
 plt.show()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# g_si = 9.81  # m/s²
+# d0   = Y_gap * 1e-6  # gap nominal [m]
+
+# accelerations = np.linspace(-30, 30, 13)  # [g]
+# capacitances  = []
+
+# for a_g in accelerations:
+#     # Mécanique
+#     x   = m * (a_g * g_si) / k        # déplacement [m]
+#     d_a = d0 - x                       # nouveau gap [m]
+
+#     if d_a <= 0:
+#         print(f"Collision à a = {a_g} g !")
+#         capacitances.append(np.nan) 
+#         continue
+
+#     # Modifier la géométrie et résoudre Laplace
+#     # (tu changes Y_gap = d_a*1e6 et tu relances la simulation)
+#     # ...
+#     # C_a = compute_C(potential_2d, vol_stator_2d, res, L_finger, V0, epsilon_0)
+#     # capacitances.append(C_a)
+
+# capacitances = np.array(capacitances)
+
+# # Dérivée numérique : différence finie centrée
+# da = np.diff(accelerations)[0] * g_si  # [m/s²]
+# dC_da = np.gradient(capacitances, accelerations * g_si)  # [F·s²/m]
+
+# print(f"dC/da à a=0 : {dC_da[len(dC_da)//2] * 1e15:.4f} fF·s²/m")
+# print(f"           = {dC_da[len(dC_da)//2] * 1e15 / g_si:.4f} fF/g")
