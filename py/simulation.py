@@ -5,16 +5,16 @@ plt.style.use("fast")  # fait en sorte que ça devrait moins bugger
 plt.set_loglevel("info") 
 
 # --------------- CONSTANTES ---------------- en µm
-# N_pairs = 20 # nombre de paires de doigts [µm] 50
-N_pairs = 4  # nombre de paires de doigts [µm] 50
+N_pairs = 20 # nombre de paires de doigts [µm] 50
+# N_pairs = 4  # nombre de paires de doigts [µm] 50
 Y_gap = 4  # gap size entre les doigts [µm] (d)
 X_width = 2  # largeur des doigts [µm] (h)
 L_finger = 100  # longueur des doigts [µm] (l)
 m = 2e-9  # masse d'épreuve [kg]
 k = 2  # constante du ressort [N/m]
 epsilon_0 = 8.854e-12
-# res = 1  # résolution [µm/pixel]
-res = 0.3  # résolution [µm/pixel]
+res = 1  # résolution [µm/pixel]
+# res = 0.3  # résolution [µm/pixel]
 iters = 5000  # nombre d'itérations voulues
 V0 = 3  # potentiel stator arbitraire
 
@@ -70,7 +70,7 @@ def make_pot(delta=0, show_iters=True):
         potential[0, :, :] = 0
         potential[-1, :, :] = V0
 
-        if i % 1000 == 0 and show_iters:
+        if i % 10 == 0 and show_iters:
             print(f"{i}/{iters}")
 
     return potential
@@ -136,7 +136,7 @@ def main():
     potential = make_pot(delta=0, show_iters=True)
     Ex, Ey, Ez = make_elec(potential)
     # ===================================================== 
-
+    
 
     # ---------------   AFFICHAGE plaques 3d -------------------------- 
     fig3d = plt.figure(figsize=(10, 8))
@@ -150,7 +150,8 @@ def main():
     colors[vol_stator] = "red"
     colors[vol_rotor] = "blue"
 
-    ax3d.voxels(voxels, facecolors=colors, edgecolor=None, linewidth=0, alpha=1)
+    if True:
+        ax3d.voxels(voxels, facecolors=colors, edgecolor=None, linewidth=0, alpha=1)
     ax3d.set_title("Géométrie en 3D : Plaques et doigts", pad=-30)
     ax3d.set_xlabel("Z (Longueur)", labelpad=25)
     ax3d.set_ylabel("X (Épaisseur)", labelpad=25)
@@ -227,7 +228,7 @@ def main():
     # ---------------   AFFICHAGE graphique dC/da -------------------------- 
         
     g = 9.81  # m/s²
-    accs_g = np.linspace(0, 50, 25)   # accélérations en [g]
+    accs_g = np.linspace(-50, 50, 25)   # accélérations en [g]
     accs_ms2 = accs_g * g               # en [m/s²]
 
     caps = []
@@ -262,6 +263,19 @@ def main():
     ax2.set_xlabel('Accélération [g]')
     ax2.set_title('Sensibilité dC/da')
     ax2.grid(True, alpha=0.3)    
+
+
+    # ---------------   PRINT question 2 -------------------------- 
+
+    C0 = caps[len(caps)//2] 
+
+    V_accelere = (C0 * V0) / caps
+
+    delta_V = V_accelere - V0
+
+    print(f"{delta_V[-1]*1e3:.2f} mV")    
+
+
 
     plt.tight_layout()
     plt.show()
